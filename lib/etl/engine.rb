@@ -202,7 +202,21 @@ module ETL #:nodoc:
         conn_config = ETL::Base.configurations[name.to_s]
         raise ETL::ETLError, "No connection found for #{name}" unless conn_config
         connection_method = "#{conn_config['adapter']}_connection"
-        ETL::Base.send(connection_method, conn_config)
+        spec = conn_config.symbolize_keys
+
+        begin
+          require 'rubygems'
+          gem "activerecord-#{spec[:adapter]}-adapter"
+          require "active_record/connection_adapters/#{spec[:adapter]}_adapter"
+        rescue LoadError
+          begin
+            require "active_record/connection_adapters/#{spec[:adapter]}_adapter"
+          rescue LoadError
+            raise "Please install the #{spec[:adapter]} adapter: `gem install activerecord-#{spec[:adapter]}-adapter` (#{$!})"
+          end
+        end
+        
+        ETL::Base.send(connection_method, spec)
       end
     end # class << self
     
