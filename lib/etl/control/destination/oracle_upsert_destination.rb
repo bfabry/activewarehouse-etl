@@ -45,7 +45,7 @@ MERGE INTO #{table_name} d
 USING (SELECT #{all_name_values.collect {|c,v| "#{v} #{c}"}.join(',')} FROM DUAL) s
 ON (#{map_src_to_dest(key_names,'s','d').join(' AND ')})
 WHEN MATCHED THEN 
-UPDATE SET #{[map_src_to_dest(map_names,'s','d'), "d.#{@update_ts_column}=CURRENT_TIMESTAMP"].flatten.join(',')}
+UPDATE SET #{[map_src_to_dest(names,'s','d'), "d.#{@update_ts_column}=CURRENT_TIMESTAMP"].flatten.join(',')}
 WHEN NOT MATCHED THEN
 INSERT (#{all_name_values.collect {|c,v| 'd.'+c}.join(',')},d.#{@insert_ts_column})
 VALUES (#{all_name_values.collect {|c,v| 's.'+c}.join(',')},CURRENT_TIMESTAMP)
